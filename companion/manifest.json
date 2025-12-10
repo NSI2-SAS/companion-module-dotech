@@ -1,6 +1,6 @@
 {
-	"id": "directout-audioprocessors",
-	"name": "directout-audioprocessors",
+	"id": "dotech",
+	"name": "dotech",
 	"shortname": "DO",
 	"description": "Control Prodigy and Maven series from DirectOut technologies",
 	"version": "0.0.0",
