@@ -5,6 +5,91 @@ import { deviceTables } from './capabilities.js'
 
 export function returnActionDefinitions(self: DirectoutInstance): CompanionActionDefinitions {
 	const actions: CompanionActionDefinitions = {
+		output_gain_adjust: {
+			name: 'Output: Adjust Gain',
+			options: [
+				{
+					id: 'output',
+					type: 'dropdown',
+					label: 'Output',
+					choices: self.choices.outputChoices,
+					default: self.choices.outputChoices[0]?.id,
+				},
+				{
+					id: 'delta',
+					type: 'number',
+					label: 'Gain Change (dB)',
+					default: 1,
+					min: -144,
+					max: 144,
+					step: 0.1,
+					tooltip: 'Positive values increase gain, negative values decrease gain.',
+				},
+			],
+			callback: (event, _context) => {
+				const outputId = event.options.output as string
+				const translation = self.translate('outgoing', 'output', outputId)
+				if (translation === undefined) return
+
+				const path = `/settings/output_gain/${translation}`
+				const currentValue = Number(self.getState(path))
+				const delta = Number(event.options.delta)
+
+				const min = -144
+				const max = 18
+				const step = 0.1
+				const decimals = step.toString().includes('.') ? step.toString().split('.')[1].length : 0
+
+				let value = (isNaN(currentValue) ? 0 : currentValue) + (isNaN(delta) ? 0 : delta)
+				value = Math.min(Math.max(value, min), max)
+				value = Number((Math.round((value + Number.EPSILON) / step) * step).toFixed(decimals))
+
+				self.sendSetCmd(path, value)
+			},
+		},
+
+		input_trim_adjust: {
+			name: 'Input: Adjust Trim',
+			options: [
+				{
+					id: 'input',
+					type: 'dropdown',
+					label: 'Input',
+					choices: self.choices.inputChoices,
+					default: self.choices.inputChoices[0]?.id,
+				},
+				{
+					id: 'delta',
+					type: 'number',
+					label: 'Trim Change (dB)',
+					default: 1,
+					min: -24,
+					max: 24,
+					step: 0.1,
+					tooltip: 'Positive values increase trim, negative values decrease trim.',
+				},
+			],
+			callback: (event, _context) => {
+				const inputId = event.options.input as string
+				const translation = self.translate('outgoing', 'input', inputId)
+				if (translation === undefined) return
+
+				const path = `/settings/input_trim/${translation}`
+				const currentValue = Number(self.getState(path))
+				const delta = Number(event.options.delta)
+
+				const min = -24
+				const max = 24
+				const step = 0.1
+				const decimals = step.toString().includes('.') ? step.toString().split('.')[1].length : 0
+
+				let value = (isNaN(currentValue) ? 0 : currentValue) + (isNaN(delta) ? 0 : delta)
+				value = Math.min(Math.max(value, min), max)
+				value = Number((Math.round((value + Number.EPSILON) / step) * step).toFixed(decimals))
+
+				self.sendSetCmd(path, value)
+			},
+		},
 		set_custom_value: {
 			name: 'Set Custom Value',
 			options: [
