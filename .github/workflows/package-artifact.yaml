@@ -30,8 +30,13 @@ jobs:
         env:
           CI: true
 
-      - name: Build installable package
-        run: yarn package
+      - name: Yarn Build
+        run: yarn build
+        env:
+          CI: true
+
+      - name: Yarn Comp Build
+        run: yarn companion-module-build
         env:
           CI: true
 
