@@ -11,7 +11,8 @@ jobs:
     name: Build Companion package artifact
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,3 +52,10 @@ jobs:
           path: ${{ steps.package_path.outputs.artifact }}
           if-no-files-found: error
           retention-days: 14
+      - name: Publish release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package_path.outputs.artifact }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
