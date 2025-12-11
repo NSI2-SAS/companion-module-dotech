@@ -43,7 +43,7 @@ jobs:
       - name: Locate package artifact
         id: package_path
         run: |
-          artifact=$(find . -maxdepth 2 -name '*.tgz' -print -quiet)
+          artifact=$(find . -maxdepth 2 -name '*.tgz' -print -quit)
           if [ -z "$artifact" ]; then
             echo "No package artifact found" >&2
             exit 1
