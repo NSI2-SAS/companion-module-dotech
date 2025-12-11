@@ -1,0 +1,63 @@
+name: Build Companion Package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-package:
+    name: Build Companion package artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Prepare environment
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+        env:
+          CI: true
+
+      - name: Build installable package
+        run: yarn package
+        env:
+          CI: true
+
+      - name: Locate package artifact
+        id: package_path
+        run: |
+          artifact=$(ls *.tgz | head -n 1)
+          if [ -z "$artifact" ]; then
+            echo "No package artifact found" >&2
+            exit 1
+          fi
+          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Companion package
+        uses: actions/upload-artifact@v4
+        with:
+          name: companion-module-package
+          path: ${{ steps.package_path.outputs.artifact }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package_path.outputs.artifact }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
